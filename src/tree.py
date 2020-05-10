@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class Node():
 	"""
@@ -175,24 +176,30 @@ class RandomForestClassifier():
 
 	# fit all trees
 	def fit(self, X, y):
-		bagged_X, bagged_y = self.bag_data(X, y)
+		# bagged_X, bagged_y = self.bag_data(X, y)
 		print('Fitting Random Forest...\n')
 		for i in range(self.n_trees):
+			bagged_X, bagged_y = self.bag_data(X, y)
 			print(i+1, end='\t\r')
+
+			tree = DecisionTreeClassifier(self.max_depth)
+			tree.build_tree(bagged_X, bagged_y, 0)
+
+			tree.
 			##################
 			# YOUR CODE HERE #
 			##################
 		print()
 
+
+	# This is supposed to be called for each tree, not only once
 	def bag_data(self, X, y, proportion=1.0):
 		bagged_X = []
 		bagged_y = []
-		for i in range(self.n_trees):
-			continue
-			##################
-			# YOUR CODE HERE #
-			##################
-
+		for j in range(2098):
+			rand = random.randint(0, 2098)
+			bagged_X.append(X[rand])
+			bagged_y.append(y[rand])
 		# ensure data is still numpy arrays
 		return np.array(bagged_X), np.array(bagged_y)
 
