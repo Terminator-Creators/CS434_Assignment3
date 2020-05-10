@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import random
 sns.set()
+random.seed()
 
 import argparse
 
@@ -18,7 +20,7 @@ def load_args():
 	parser.add_argument('--ada_boost', default=1, type=int)
 	parser.add_argument('--root_dir', default='../data/', type=str)
 	args = parser.parse_args()
-
+ 
 	return args
 
 
