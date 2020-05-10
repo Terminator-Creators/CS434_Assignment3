@@ -7,7 +7,7 @@ sns.set()
 import argparse
 
 from utils import load_data, f1, accuracy_score, load_dictionary, dictionary_info
-from tree import DecisionTreeClassifier, RandomForestClassifier
+from tree import DecisionTreeClassifier, RandomForestClassifier, AdaBoostClassifier
 
 def load_args():
 
@@ -52,7 +52,17 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 	preds = rclf.predict(x_test)
 	print('F1 Test {}'.format(f1(y_test, preds)))
 
-
+def ada_boost_testing(x_train, y_train, x_test, y_test):
+	print('Adaboost\n\n')
+	adbt = AdaBoostClassifier()
+	L = 100
+	h = np.zeros(L)
+	e = np.zeros(L)
+	d = np.full((1,2098),1/2098)
+	for t in range(L):
+		h[t] = adbt.fit(x_train, y_train, d)
+		e[t] = adbt.err(h[t], x_train, y_train, d)
+	
 
 ###################################################
 # Modify for running your experiments accordingly #

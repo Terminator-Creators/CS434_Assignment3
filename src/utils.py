@@ -31,6 +31,13 @@ def f1(y, yhat):
 	return f1_score(y, yhat)
 
 
+def adaboost_data(rootdir='./'):
+	x_train = np.loadtxt(rootdir+'x_train.csv', delimiter=',').astype(int)
+	y_train = np.loadtxt(rootdir+'y_train.csv', delimiter=',').astype(int)
+	x_test = np.loadtxt(rootdir+'x_test.csv', delimiter=',').astype(int)
+	y_test = np.loadtxt(rootdir+'y_test.csv', delimiter=',').astype(int)
+	return x_train, y_train, x_test, y_test
+
 
 ###########################################################################
 # you may add plotting or data processing functions (etc) in here if desired
