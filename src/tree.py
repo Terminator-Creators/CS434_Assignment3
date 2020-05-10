@@ -129,6 +129,7 @@ class DecisionTreeClassifier():
 		left_y = y[left_idx]
 		right_y = y[right_idx]
 
+
 		# calculate gini impurity and gain for y, left_y, right_y
 		gain = self.calculate_gini_gain(y, left_y, right_y)
 		return gain, left_X, right_X, left_y, right_y
@@ -142,12 +143,37 @@ class DecisionTreeClassifier():
 			########################################
 			#       YOUR CODE GOES HERE            #
 			########################################
+			left_yes = 0
+			left_no = 0
+			right_yes = 0
+			right_no = 0
 
-			return gain
+			for i in left_y:
+				if i == 0:
+					left_no += 1
+				else:
+					left_yes += 1
+
+			for i in right_y:
+				if i == 0:
+					right_no += 1
+				else:
+					right_yes += 1
+
+			total = len(left_y) + len(right_y)
+			#calculate all impurities and return gain
+			gini_left = 1 - np.square(left_yes/(left_yes+left_no)) - np.square(left_no/(left_yes+left_no))
+			gini_right = 1 - np.square(right_yes/(right_yes+right_no)) - np.square(right_no/(right_yes+right_no))
+            gain = ((left_yes+left_no)/total) * gini_left + ((right_yes + right_no)/total) * gini_right
+
+            return gain
 		# we hit leaf node
 		# don't have any gain, and don't want to divide by 0
 		else:
 			return 0
+
+
+
 
 class RandomForestClassifier():
 	"""
