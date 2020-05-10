@@ -185,13 +185,14 @@ class RandomForestClassifier():
 			tree = DecisionTreeClassifier(self.max_depth)
 			tree.build_tree(bagged_X, bagged_y, 0)
 
-			tree.
+			tree.fit()
 			##################
 			# YOUR CODE HERE #
 			##################
 		print()
 
 
+	# --DONE
 	# This is supposed to be called for each tree, not only once
 	def bag_data(self, X, y, proportion=1.0):
 		bagged_X = []
@@ -203,7 +204,7 @@ class RandomForestClassifier():
 		# ensure data is still numpy arrays
 		return np.array(bagged_X), np.array(bagged_y)
 
-
+	# --DONE
 	def predict(self, X):
 		preds = []
 
