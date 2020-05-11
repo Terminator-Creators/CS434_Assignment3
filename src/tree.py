@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from statistics import mode
 
 class Node():
 	"""
@@ -164,9 +165,9 @@ class DecisionTreeClassifier():
 			#calculate all impurities and return gain
 			gini_left = 1 - np.square(left_yes/(left_yes+left_no)) - np.square(left_no/(left_yes+left_no))
 			gini_right = 1 - np.square(right_yes/(right_yes+right_no)) - np.square(right_no/(right_yes+right_no))
-            gain = ((left_yes+left_no)/total) * gini_left + ((right_yes + right_no)/total) * gini_right
+			gain = ((left_yes+left_no)/total) * gini_left + ((right_yes + right_no)/total) * gini_right
 
-            return gain
+			return gain
 		# we hit leaf node
 		# don't have any gain, and don't want to divide by 0
 		else:
@@ -196,52 +197,51 @@ class RandomForestClassifier():
 		self.max_features = max_features
 		self.max_depth = max_depth
 
-		##################
-		# YOUR CODE HERE #
-		##################
-
+	
 	# fit all trees
 	def fit(self, X, y):
-		# bagged_X, bagged_y = self.bag_data(X, y)
 		print('Fitting Random Forest...\n')
+		self.root = []
+		self.num_classes = []
 		for i in range(self.n_trees):
 			bagged_X, bagged_y = self.bag_data(X, y)
 			print(i+1, end='\t\r')
 
+			# Essentially the fit function from DecisionTreeClassifier
 			tree = DecisionTreeClassifier(self.max_depth)
-			tree.build_tree(bagged_X, bagged_y, 0)
+			tree.num_classes = len(set(bagged_y))
+			self.num_classes.append(len(set(bagged_y)))
+			self.root.append(tree.build_tree(bagged_X, bagged_y, 0))
+	
+		print("Fitted " + str(self.n_trees) + " Trees.\n")
 
-			tree.fit()
-			##################
-			# YOUR CODE HERE #
-			##################
-		print()
-
-
-	# --DONE
 	# This is supposed to be called for each tree, not only once
 	def bag_data(self, X, y, proportion=1.0):
 		bagged_X = []
 		bagged_y = []
 		for j in range(2098):
-			rand = random.randint(0, 2098)
+			rand = random.randint(0, 2097)
 			bagged_X.append(X[rand])
 			bagged_y.append(y[rand])
 		# ensure data is still numpy arrays
 		return np.array(bagged_X), np.array(bagged_y)
 
-	# --DONE
+	# Prediciton function that uses helper
 	def predict(self, X):
+		return [self._predict(x) for x in X]
+	
+	# Prediction helper that runs each prediction for each tree and return the mode
+	def _predict(self, x):
 		preds = []
-
-		# remove this one \/
-		preds = np.ones(len(X)).astype(int)
-		# ^that line is only here so the code runs
-
-		##################
-		# YOUR CODE HERE #
-		##################
-		return preds
+		for i in range(self.n_trees):
+			node = self.root[i]
+			while node.left_tree:
+				if x[node.feature] < node.split:
+					node = node.left_tree
+				else:
+					node = node.right_tree
+			preds.append(node.prediction)
+		return mode(preds)
 
 
 ################################################
