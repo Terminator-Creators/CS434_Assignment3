@@ -128,9 +128,16 @@ if __name__ == '__main__':
 	if args.ada_boost == 1:
 		x_train, y_train, x_test, y_test = adaboost_data(args.root_dir)
 		tst_acc = []
+		l = []
 		for i in range(20):
 			trn_acc, test_acc = ada_boost_testing(x_train, y_train, x_test, y_test, i*10)
+			l.append(i*10)
 		tst_acc.append(test_acc)
+		plt.plot(l, tst_acc)
+		plt.xlabel("Number of features (L)")
+		plt.ylabel("Testing Accuracy")
+		plt.savefig("adaboosttest.png")
+		plt.clf()
 		
 
 	print('Done')
