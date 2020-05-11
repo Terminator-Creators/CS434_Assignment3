@@ -67,32 +67,13 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 	preds = rclf.predict(x_test)
 	print('F1 Test {}'.format(f1(y_test, preds)))
 	
-
-
-
-###################################################
-# Modify for running your experiments accordingly #
-###################################################
-if __name__ == '__main__':
-	args = load_args()
-
+def create_trees_wrapper():
 	f1_accuracy = [0 for f1_accuracy in range(25)]
 	test_accuracy = [0 for test_accuracy in range(25)]
 	train_accuracy = [0 for train_accuracy in range(25)]
-
-	x_train, y_train, x_test, y_test = load_data(args.root_dir)
-	if args.county_dict == 1:
-		county_info(args)
-	if args.decision_tree == 1:
-		decision_tree_testing(x_train, y_train, x_test, y_test)
-	
 	for x in range(25):
-			f1_accuracy[x], train_accuracy[x], test_accuracy[x]= create_trees(x_train, y_train, x_test, y_test, x+1)
-	
-	if args.random_forest == 1:
-		random_forest_testing(x_train, y_train, x_test, y_test)
-
-
+		f1_accuracy[x], train_accuracy[x], test_accuracy[x]= create_trees(x_train, y_train, x_test, y_test, x+1)
+		
 	# Plot the training and testing ASE's vs d
 	d = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
 	plt.rcParams['font.family'] = ['serif']
@@ -125,6 +106,23 @@ if __name__ == '__main__':
 	plt.ylabel("F1 Testing Accuracy")
 	plt.savefig("f1test.png")
 	plt.clf()
+
+
+###################################################
+# Modify for running your experiments accordingly #
+###################################################
+if __name__ == '__main__':
+	args = load_args()
+
+	x_train, y_train, x_test, y_test = load_data(args.root_dir)
+	if args.county_dict == 1:
+		county_info(args)
+	if args.decision_tree == 1:
+		decision_tree_testing(x_train, y_train, x_test, y_test)
+		create_trees_wrapper()
+	
+	if args.random_forest == 1:
+		random_forest_testing(x_train, y_train, x_test, y_test)
 
 	print('Done')
 	
