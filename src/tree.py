@@ -224,7 +224,7 @@ class RandomForestClassifier():
 		# ensure data is still numpy arrays
 		return np.array(bagged_X), np.array(bagged_y)
 
-	# Prediciton function that uses helper
+	# Prediction function that uses helper
 	def predict(self, X):
 		return [self._predict(x) for x in X]
 	
