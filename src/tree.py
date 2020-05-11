@@ -1,4 +1,6 @@
 import numpy as np
+import random
+from statistics import mode
 
 class Node():
     """
@@ -171,69 +173,73 @@ class DecisionTreeClassifier():
         else:
             return 0
 
-
-
-
+          
 class RandomForestClassifier():
-    """
-    Random Forest Classifier. Build a forest of decision trees.
-    Use this forest for ensemble predictions
+	"""
+	Random Forest Classifier. Build a forest of decision trees.
+	Use this forest for ensemble predictions
 
-    YOU WILL NEED TO MODIFY THE DECISION TREE VERY SLIGHTLY TO HANDLE FEATURE BAGGING
+	YOU WILL NEED TO MODIFY THE DECISION TREE VERY SLIGHTLY TO HANDLE FEATURE BAGGING
 
-    Parameters:
-    -----------
-    n_trees: int
-        Number of trees in forest/ensemble
-    max_features: int
-        Maximum number of features to consider for a split when feature bagging
-    max_depth: int
-        Maximum depth of any decision tree in forest/ensemble
-    """
-    def __init__(self, n_trees, max_features, max_depth):
-        self.n_trees = n_trees
-        self.max_features = max_features
-        self.max_depth = max_depth
+	Parameters:
+	-----------
+	n_trees: int
+		Number of trees in forest/ensemble
+	max_features: int
+		Maximum number of features to consider for a split when feature bagging
+	max_depth: int
+		Maximum depth of any decision tree in forest/ensemble
+	"""
+	def __init__(self, n_trees, max_features, max_depth):
+		self.n_trees = n_trees
+		self.max_features = max_features
+		self.max_depth = max_depth
 
-        ##################
-        # YOUR CODE HERE #
-        ##################
+	
+	# fit all trees
+	def fit(self, X, y):
+		print('Fitting Random Forest...\n')
+		self.root = []
+		self.num_classes = []
+		for i in range(self.n_trees):
+			bagged_X, bagged_y = self.bag_data(X, y)
+			print(i+1, end='\t\r')
 
-    # fit all trees
-    def fit(self, X, y):
-        bagged_X, bagged_y = self.bag_data(X, y)
-        print('Fitting Random Forest...\n')
-        for i in range(self.n_trees):
-            print(i+1, end='\t\r')
-            ##################
-            # YOUR CODE HERE #
-            ##################
-        print()
+			# Essentially the fit function from DecisionTreeClassifier
+			tree = DecisionTreeClassifier(self.max_depth)
+			tree.num_classes = len(set(bagged_y))
+			self.num_classes.append(len(set(bagged_y)))
+			self.root.append(tree.build_tree(bagged_X, bagged_y, 0))
+	
+		print("Fitted " + str(self.n_trees) + " Trees.\n")
 
-    def bag_data(self, X, y, proportion=1.0):
-        bagged_X = []
-        bagged_y = []
-        for i in range(self.n_trees):
-            continue
-            ##################
-            # YOUR CODE HERE #
-            ##################
+	# This is supposed to be called for each tree, not only once
+	def bag_data(self, X, y, proportion=1.0):
+		bagged_X = []
+		bagged_y = []
+		for j in range(2098):
+			rand = random.randint(0, 2097)
+			bagged_X.append(X[rand])
+			bagged_y.append(y[rand])
+		# ensure data is still numpy arrays
+		return np.array(bagged_X), np.array(bagged_y)
 
-        # ensure data is still numpy arrays
-        return np.array(bagged_X), np.array(bagged_y)
-
-
-    def predict(self, X):
-        preds = []
-
-        # remove this one \/
-        preds = np.ones(len(X)).astype(int)
-        # ^that line is only here so the code runs
-
-        ##################
-        # YOUR CODE HERE #
-        ##################
-        return preds
+	# Prediciton function that uses helper
+	def predict(self, X):
+		return [self._predict(x) for x in X]
+	
+	# Prediction helper that runs each prediction for each tree and return the mode
+	def _predict(self, x):
+		preds = []
+		for i in range(self.n_trees):
+			node = self.root[i]
+			while node.left_tree:
+				if x[node.feature] < node.split:
+					node = node.left_tree
+				else:
+					node = node.right_tree
+			preds.append(node.prediction)
+		return mode(preds)
 
 
 ################################################
