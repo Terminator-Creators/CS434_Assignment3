@@ -247,9 +247,99 @@ class RandomForestClassifier():
 # MUST MODIFY THIS EXISTING DECISION TREE CODE #
 ################################################
 class AdaBoostClassifier():
-    def __init__(self):
-        pass
+	"""
+	Initialization:
+	Max depth is set to 1.
+	"""
+	def __init__(self, max_depth=1):
+		self.max_depth = max_depth
+	# take in features X and labels y
+	# build a tree
+	def fit(self, X, y, d):
+		self.root = self.build_tree(X, y, d, depth=1)
+		return self.root
 
+	# make prediction for each example of features X
+	def predict(self, X):
+		preds = [self._predict(example) for example in X]
+
+		return preds
+
+	# prediction for a given example
+	# traverse tree by following splits at nodes
+	def _predict(self, example):
+		node = self.root
+		if (example[node.feature] >= node.split):
+			# print("left: ", node.left_tree)
+			return node.left_tree
+		else:
+			# print("right: ", node.right_tree)
+			return node.right_tree
+
+	# accuracy
+	def accuracy_score(self, X, y):
+		preds = self.predict(X)
+		accuracy = (preds == y).sum()/len(y)
+		return accuracy
+
+	# function to build a decision tree
+	def build_tree(self, X, y, d, depth):
+		# num_samples, num_features = X.shape
+		# which features we are considering for splitting on
+		self.features_idx = np.arange(0, X.shape[1])
+
+		# store data and information about best split
+		# used when building subtrees recursively
+		best_feature = None
+		best_split = None
+		best_gain = 10000.0
+		best_left_X = None
+		best_left_y = None
+		best_right_X = None
+		best_right_y = None
+
+		# what we would predict at this node if we had to
+		# majority class
+		num_samples_per_class = [np.sum(y == i) for i in [-1, 1]]
+		prediction = np.argmax(num_samples_per_class)
+
+		# # if we haven't hit the maximum depth, keep building
+		# if depth <= self.max_depth:
+		# 	# consider each feature
+		for feature in self.features_idx:
+			# consider the set of all values for that feature to split on
+			possible_splits = np.unique(X[:, feature])
+			for split in possible_splits:
+				error1 = 0
+				error2 = 0
+				for x in range(len(X)):
+					if (X[x][feature] < split):
+						if(y[x] == 1):
+							error1+=d[x]
+						else:
+							error2+=d[x]
+					if (X[x][feature] >= split): 
+						if(y[x]==1):
+							error2+=d[x]
+						else:
+							error1+=d[x]
+				if (error1 < best_gain):
+					best_gain = error1
+					best_feature = feature
+					best_split = split
+					best_left_y = -1
+					best_right_y = 1
+				if(error2 < best_gain):
+					best_gain = error2
+					best_feature = feature
+					best_split = split
+					best_left_y = 1
+					best_right_y = -1
+
+		# print(best_feature, best_split, best_left_y, best_right_y)
+
+		# if we did hit a leaf node
+		return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=best_left_y, right_tree=best_right_y)
 
 
 
