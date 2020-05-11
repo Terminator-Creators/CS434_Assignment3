@@ -224,7 +224,6 @@ class AdaBoostClassifier():
 	# take in features X and labels y
 	# build a tree
 	def fit(self, X, y, d):
-		self.num_classes = len(set(y))
 		self.root = self.build_tree(X, y, d, depth=1)
 		return self.root
 
@@ -261,7 +260,7 @@ class AdaBoostClassifier():
 		# used when building subtrees recursively
 		best_feature = None
 		best_split = None
-		best_gain = 0.0
+		best_gain = 10000.0
 		best_left_X = None
 		best_left_y = None
 		best_right_X = None
@@ -269,7 +268,7 @@ class AdaBoostClassifier():
 
 		# what we would predict at this node if we had to
 		# majority class
-		num_samples_per_class = [np.sum(y == i) for i in range(self.num_classes)]
+		num_samples_per_class = [np.sum(y == i) for i in [-1, 1]]
 		prediction = np.argmax(num_samples_per_class)
 
 		# # if we haven't hit the maximum depth, keep building
@@ -279,90 +278,36 @@ class AdaBoostClassifier():
 			# consider the set of all values for that feature to split on
 			possible_splits = np.unique(X[:, feature])
 			for split in possible_splits:
-				# get the gain and the data on each side of the split
-				# >= split goes on right, < goes on left
-				gain, left_X, right_X, left_y, right_y = self.check_split(X, y, d, feature, split)
-				# if we have a better gain, use this split and keep track of data
-				if gain > best_gain:
-					print(gain)
-					print(feature)
-					best_gain = gain
+				error1 = 0
+				error2 = 0
+				for x in range(len(X)):
+					if (X[x][feature] < split):
+						if(y[x] == 1):
+							error1+=d[x]
+						else:
+							error2+=d[x]
+					if (X[x][feature] >= split): 
+						if(y[x]==1):
+							error2+=d[x]
+						else:
+							error1+=d[x]
+				if (error1 < best_gain):
+					best_gain = error1
 					best_feature = feature
 					best_split = split
-					best_left_X = left_X
-					best_right_X = right_X
-					best_left_y = left_y
-					best_right_y = right_y
-					
-		left_side = best_left_y.sum(axis=0)
-		print(left_side)
-		if (left_side > 0):
-			left_side = 1
-		else:
-			left_side = -1		
-		
-		right_side = best_right_y.sum(axis=0)
-		print(right_side)
-		if (right_side > 0):
-			right_side = 1
-		else:
-			right_side = -1
+					best_left_y = -1
+					best_right_y = 1
+				if(error2 < best_gain):
+					best_gain = error2
+					best_feature = feature
+					best_split = split
+					best_left_y = 1
+					best_right_y = -1
+
+		# print(best_feature, best_split, best_left_y, best_right_y)
+
 		# if we did hit a leaf node
-		return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=left_side, right_tree=right_side)
-
-
-	# gets data corresponding to a split by using numpy indexing
-	def check_split(self, X, y, d, feature, split):
-		left_idx = np.where(X[:, feature] < split)
-		right_idx = np.where(X[:, feature] >= split)
-		left_X = X[left_idx]
-		right_X = X[right_idx]
-		left_y = y[left_idx]
-		right_y = y[right_idx]
-
-		# calculate gini impurity and gain for y, left_y, right_y
-		gain = self.calculate_gini_gain(y, left_y, right_y, d, feature)
-		return gain, left_X, right_X, left_y, right_y
-
-	def calculate_gini_gain(self, y, left_y, right_y, d, feature):
-		# not a leaf node
-		# calculate gini impurity and gain
-		gain = 0
-		if len(left_y) > 0 and len(right_y) > 0:
-
-			########################################
-			#       YOUR CODE GOES HERE            #
-			########################################
-			left_yes = 0
-			left_no = 0
-			right_yes = 0
-			right_no = 0
-
-			for i in left_y:
-				if i == -1:
-					left_no += d[feature]
-				else:
-					left_yes += d[feature]
-
-			for i in right_y:
-				if i == -1:
-					right_no += d[feature]
-				else:
-					right_yes += d[feature]
-
-			total = 1
-			#calculate all impurities and return gain
-			gini_left = 1 - np.square(left_yes/(left_yes+left_no)) - np.square(left_no/(left_yes+left_no))
-			gini_right = 1 - np.square(right_yes/(right_yes+right_no)) - np.square(right_no/(right_yes+right_no))
-			gini_top = 1 - np.square(len(left_y)/(len(left_y)+len(right_y))) - np.square(len(right_y)/(len(left_y)+len(right_y)))
-			gain = gini_top - (((left_yes+left_no)/total) * gini_left + ((right_yes + right_no)/total) * gini_right)
-
-			return gain
-		# we hit leaf node
-		# don't have any gain, and don't want to divide by 0
-		else:
-			return 0
-
+		return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=best_left_y, right_tree=best_right_y)
 
 
 

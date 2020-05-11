@@ -52,10 +52,10 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 	preds = rclf.predict(x_test)
 	print('F1 Test {}'.format(f1(y_test, preds)))
 
-def ada_boost_testing(x_train, y_train, x_test, y_test):
+def ada_boost_testing(x_train, y_train, x_test, y_test, l=10):
 	print('Adaboost\n\n')
 	adbt = AdaBoostClassifier()
-	L = 1
+	L = l
 	h = []
 	e = np.zeros(L)
 	a = np.zeros(L)
@@ -65,8 +65,9 @@ def ada_boost_testing(x_train, y_train, x_test, y_test):
 		for i in range(2098):
 			if (adbt._predict(x_train[i]) != y_train[i]):
 				e[t] = e[t] + d[t][i]
-
+		# print(e[t])
 		a[t] = 1/2*np.log( (( 1 - e[t]) / e[t]) )
+		# print(a[t])
 
 		if (t < L-1):
 			for i in range(2098):
@@ -84,9 +85,9 @@ def ada_boost_testing(x_train, y_train, x_test, y_test):
 			else:
 				preds_train[i] += a[t]*h[t].left_tree
 		if(preds_train[i] > 0):
-			preds_train[i] = 1
-		else:
 			preds_train[i] = -1
+		else:
+			preds_train[i] = 1
 				
 	preds_test = []
 	for i in range(700):
@@ -97,16 +98,17 @@ def ada_boost_testing(x_train, y_train, x_test, y_test):
 			else:
 				preds_test[i] += a[t]*h[t].left_tree
 		if(preds_test[i] > 0):
-			preds_test[i] = 1
-		else:
 			preds_test[i] = -1
+		else:
+			preds_test[i] = 1
 
-	print(h[0].split)
-	# print()
+	# print(preds_train)
+	# print(preds_test)
 	train_accuracy = (preds_train == y_train).sum()/len(y_train)
 	test_accuracy = (preds_test == y_test).sum()/len(y_test)
 	print('Train {}'.format(train_accuracy))
 	print('Test {}'.format(test_accuracy))
+	return train_accuracy, test_accuracy
 	
 
 	
@@ -125,7 +127,11 @@ if __name__ == '__main__':
 		random_forest_testing(x_train, y_train, x_test, y_test)
 	if args.ada_boost == 1:
 		x_train, y_train, x_test, y_test = adaboost_data(args.root_dir)
-		ada_boost_testing(x_train, y_train, x_test, y_test)
+		tst_acc = []
+		for i in range(20):
+			trn_acc, test_acc = ada_boost_testing(x_train, y_train, x_test, y_test, i*10)
+		tst_acc.append(test_acc)
+		
 
 	print('Done')
 	
