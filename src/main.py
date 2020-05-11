@@ -41,6 +41,21 @@ def decision_tree_testing(x_train, y_train, x_test, y_test):
 	preds = clf.predict(x_test)
 	print('F1 Test {}'.format(f1(y_test, preds)))
 
+def create_trees(x_train, y_train, x_test, y_test, maxdepth):
+	#print('Decision Tree\n\n')
+	clf = DecisionTreeClassifier(max_depth=maxdepth)
+	clf.fit(x_train, y_train)
+	preds_train = clf.predict(x_train)
+	preds_test = clf.predict(x_test)
+	train_accuracy = accuracy_score(preds_train, y_train)
+	test_accuracy = accuracy_score(preds_test, y_test)
+	#print('Train {}'.format(train_accuracy))
+	#print('Test {}'.format(test_accuracy))
+	preds = clf.predict(x_test)
+	#print('F1 Test {}'.format(f1(y_test, preds)))
+	return (f1(y_test, preds)),train_accuracy, test_accuracy
+
+
 def random_forest_testing(x_train, y_train, x_test, y_test):
 	print('Random Forest Loop\n\n')
 	train_list = []
@@ -88,7 +103,46 @@ def OG_random_forest_testing(x_train, y_train, x_test, y_test):
 	print('Test {}'.format(test_accuracy))
 	preds = rclf.predict(x_test)
 	print('F1 Test {}'.format(f1(y_test, preds)))
+	
+def create_trees_wrapper():
+	f1_accuracy = [0 for f1_accuracy in range(25)]
+	test_accuracy = [0 for test_accuracy in range(25)]
+	train_accuracy = [0 for train_accuracy in range(25)]
+	for x in range(25):
+		f1_accuracy[x], train_accuracy[x], test_accuracy[x]= create_trees(x_train, y_train, x_test, y_test, x+1)
+		
+	# Plot the training and testing ASE's vs d
+	d = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+	plt.rcParams['font.family'] = ['serif']
 
+	plt.plot(d, train_accuracy)
+	plt.xlabel("Max Depth")
+	plt.xticks([1,5,10,15,20,25])
+	plt.ylabel("Training Accuracy")
+	plt.savefig("train.png")
+	plt.clf()
+
+	# Plot the training and testing ASE's vs d
+	d = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+	plt.rcParams['font.family'] = ['serif']
+
+	plt.plot(d,test_accuracy)
+	plt.xlabel("Max Depth")
+	plt.xticks([1,5,10,15,20,25])
+	plt.ylabel("Testing Accuracy")
+	plt.savefig("test.png")
+	plt.clf()
+
+	# Plot the training and testing ASE's vs d
+	d = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+	plt.rcParams['font.family'] = ['serif']
+
+	plt.plot(d,f1_accuracy)
+	plt.xlabel("Max Depth")
+	plt.xticks([1,5,10,15,20,25])
+	plt.ylabel("F1 Testing Accuracy")
+	plt.savefig("f1test.png")
+	plt.clf()
 
 
 ###################################################
@@ -96,11 +150,14 @@ def OG_random_forest_testing(x_train, y_train, x_test, y_test):
 ###################################################
 if __name__ == '__main__':
 	args = load_args()
+
 	x_train, y_train, x_test, y_test = load_data(args.root_dir)
 	if args.county_dict == 1:
 		county_info(args)
 	if args.decision_tree == 1:
 		decision_tree_testing(x_train, y_train, x_test, y_test)
+		create_trees_wrapper()
+	
 	if args.random_forest == 1:
 		random_forest_testing(x_train, y_train, x_test, y_test)
 
