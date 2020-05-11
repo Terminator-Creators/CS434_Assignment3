@@ -6,7 +6,7 @@ sns.set()
 
 import argparse
 
-from utils import load_data, f1, accuracy_score, load_dictionary, dictionary_info
+from utils import load_data, f1, accuracy_score, load_dictionary, dictionary_info, adaboost_data
 from tree import DecisionTreeClassifier, RandomForestClassifier, AdaBoostClassifier
 
 def load_args():
@@ -55,13 +55,60 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 def ada_boost_testing(x_train, y_train, x_test, y_test):
 	print('Adaboost\n\n')
 	adbt = AdaBoostClassifier()
-	L = 100
-	h = np.zeros(L)
+	L = 1
+	h = []
 	e = np.zeros(L)
-	d = np.full((1,2098),1/2098)
+	a = np.zeros(L)
+	d = np.full((L,2098),1/2098)
 	for t in range(L):
-		h[t] = adbt.fit(x_train, y_train, d)
-		e[t] = adbt.err(h[t], x_train, y_train, d)
+		h.append(adbt.fit(x_train, y_train, d[t]))
+		for i in range(2098):
+			if (adbt._predict(x_train[i]) != y_train[i]):
+				e[t] = e[t] + d[t][i]
+
+		a[t] = 1/2*np.log( (( 1 - e[t]) / e[t]) )
+
+		if (t < L-1):
+			for i in range(2098):
+				if(adbt._predict(x_train[i]) == y_train[i]):
+					d[t+1][i] = d[t][i] * np.exp(-a[t])
+				else:
+					d[t+1][i] = d[t][i] * np.exp(a[t])
+				d[t+1] = (d[t+1]/d[t+1].sum())
+	preds_train = []
+	for i in range(2098):
+		preds_train = np.append(preds_train, 0)
+		for t in range(L):
+			if (x_train[i][h[t].feature] >= h[t].split):
+				preds_train[i] += a[t]*h[t].right_tree
+			else:
+				preds_train[i] += a[t]*h[t].left_tree
+		if(preds_train[i] > 0):
+			preds_train[i] = 1
+		else:
+			preds_train[i] = -1
+				
+	preds_test = []
+	for i in range(700):
+		preds_test = np.append(preds_test, 0)
+		for t in range(L):
+			if (x_test[i][h[t].feature] >= h[t].split):
+				preds_test[i] += a[t]*h[t].right_tree
+			else:
+				preds_test[i] += a[t]*h[t].left_tree
+		if(preds_test[i] > 0):
+			preds_test[i] = 1
+		else:
+			preds_test[i] = -1
+
+	print(h[0].split)
+	# print()
+	train_accuracy = (preds_train == y_train).sum()/len(y_train)
+	test_accuracy = (preds_test == y_test).sum()/len(y_test)
+	print('Train {}'.format(train_accuracy))
+	print('Test {}'.format(test_accuracy))
+	
+
 	
 
 ###################################################
@@ -76,6 +123,9 @@ if __name__ == '__main__':
 		decision_tree_testing(x_train, y_train, x_test, y_test)
 	if args.random_forest == 1:
 		random_forest_testing(x_train, y_train, x_test, y_test)
+	if args.ada_boost == 1:
+		x_train, y_train, x_test, y_test = adaboost_data(args.root_dir)
+		ada_boost_testing(x_train, y_train, x_test, y_test)
 
 	print('Done')
 	

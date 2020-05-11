@@ -225,7 +225,8 @@ class AdaBoostClassifier():
 	# build a tree
 	def fit(self, X, y, d):
 		self.num_classes = len(set(y))
-		return self.build_tree(X, y, d, depth=1)
+		self.root = self.build_tree(X, y, d, depth=1)
+		return self.root
 
 	# make prediction for each example of features X
 	def predict(self, X):
@@ -237,12 +238,12 @@ class AdaBoostClassifier():
 	# traverse tree by following splits at nodes
 	def _predict(self, example):
 		node = self.root
-		while node.left_tree:
-			if example[node.feature] < node.split:
-				node = node.left_tree
-			else:
-				node = node.right_tree
-		return node.prediction
+		if (example[node.feature] >= node.split):
+			# print("left: ", node.left_tree)
+			return node.left_tree
+		else:
+			# print("right: ", node.right_tree)
+			return node.right_tree
 
 	# accuracy
 	def accuracy_score(self, X, y):
@@ -252,7 +253,7 @@ class AdaBoostClassifier():
 
 	# function to build a decision tree
 	def build_tree(self, X, y, d, depth):
-		num_samples, num_features = X.shape
+		# num_samples, num_features = X.shape
 		# which features we are considering for splitting on
 		self.features_idx = np.arange(0, X.shape[1])
 
@@ -271,39 +272,47 @@ class AdaBoostClassifier():
 		num_samples_per_class = [np.sum(y == i) for i in range(self.num_classes)]
 		prediction = np.argmax(num_samples_per_class)
 
-		# if we haven't hit the maximum depth, keep building
-		if depth <= self.max_depth:
-			# consider each feature
-			for feature in self.features_idx:
-				# consider the set of all values for that feature to split on
-				possible_splits = np.unique(X[:, feature])
-				for split in possible_splits:
-					# get the gain and the data on each side of the split
-					# >= split goes on right, < goes on left
-					gain, left_X, right_X, left_y, right_y = self.check_split(X, y, feature, split)
-					# if we have a better gain, use this split and keep track of data
-					if gain > best_gain:
-						best_gain = gain
-						best_feature = feature
-						best_split = split
-						best_left_X = left_X
-						best_right_X = right_X
-						best_left_y = left_y
-						best_right_y = right_y
+		# # if we haven't hit the maximum depth, keep building
+		# if depth <= self.max_depth:
+		# 	# consider each feature
+		for feature in self.features_idx:
+			# consider the set of all values for that feature to split on
+			possible_splits = np.unique(X[:, feature])
+			for split in possible_splits:
+				# get the gain and the data on each side of the split
+				# >= split goes on right, < goes on left
+				gain, left_X, right_X, left_y, right_y = self.check_split(X, y, d, feature, split)
+				# if we have a better gain, use this split and keep track of data
+				if gain > best_gain:
+					print(gain)
+					print(feature)
+					best_gain = gain
+					best_feature = feature
+					best_split = split
+					best_left_X = left_X
+					best_right_X = right_X
+					best_left_y = left_y
+					best_right_y = right_y
+					
+		left_side = best_left_y.sum(axis=0)
+		print(left_side)
+		if (left_side > 0):
+			left_side = 1
+		else:
+			left_side = -1		
 		
-		# if we haven't hit a leaf node
-		# add subtrees recursively
-		if best_gain > 0.0:
-			left_tree = self.build_tree(best_left_X, best_left_y, depth=depth+1)
-			right_tree = self.build_tree(best_right_X, best_right_y, depth=depth+1)
-			return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=left_tree, right_tree=right_tree)
-
+		right_side = best_right_y.sum(axis=0)
+		print(right_side)
+		if (right_side > 0):
+			right_side = 1
+		else:
+			right_side = -1
 		# if we did hit a leaf node
-		return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=None, right_tree=None)
+		return Node(prediction=prediction, feature=best_feature, split=best_split, left_tree=left_side, right_tree=right_side)
 
 
 	# gets data corresponding to a split by using numpy indexing
-	def check_split(self, X, y, feature, split):
+	def check_split(self, X, y, d, feature, split):
 		left_idx = np.where(X[:, feature] < split)
 		right_idx = np.where(X[:, feature] >= split)
 		left_X = X[left_idx]
@@ -312,10 +321,10 @@ class AdaBoostClassifier():
 		right_y = y[right_idx]
 
 		# calculate gini impurity and gain for y, left_y, right_y
-		gain = self.calculate_gini_gain(y, left_y, right_y)
+		gain = self.calculate_gini_gain(y, left_y, right_y, d, feature)
 		return gain, left_X, right_X, left_y, right_y
 
-	def calculate_gini_gain(self, y, left_y, right_y):
+	def calculate_gini_gain(self, y, left_y, right_y, d, feature):
 		# not a leaf node
 		# calculate gini impurity and gain
 		gain = 0
@@ -324,6 +333,29 @@ class AdaBoostClassifier():
 			########################################
 			#       YOUR CODE GOES HERE            #
 			########################################
+			left_yes = 0
+			left_no = 0
+			right_yes = 0
+			right_no = 0
+
+			for i in left_y:
+				if i == -1:
+					left_no += d[feature]
+				else:
+					left_yes += d[feature]
+
+			for i in right_y:
+				if i == -1:
+					right_no += d[feature]
+				else:
+					right_yes += d[feature]
+
+			total = 1
+			#calculate all impurities and return gain
+			gini_left = 1 - np.square(left_yes/(left_yes+left_no)) - np.square(left_no/(left_yes+left_no))
+			gini_right = 1 - np.square(right_yes/(right_yes+right_no)) - np.square(right_no/(right_yes+right_no))
+			gini_top = 1 - np.square(len(left_y)/(len(left_y)+len(right_y))) - np.square(len(right_y)/(len(left_y)+len(right_y)))
+			gain = gini_top - (((left_yes+left_no)/total) * gini_left + ((right_yes + right_no)/total) * gini_right)
 
 			return gain
 		# we hit leaf node
