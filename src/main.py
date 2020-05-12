@@ -132,7 +132,7 @@ if __name__ == '__main__':
 		for i in range(20):
 			trn_acc, test_acc = ada_boost_testing(x_train, y_train, x_test, y_test, i*10)
 			l.append(i*10)
-		tst_acc.append(test_acc)
+			tst_acc.append(test_acc)
 		plt.plot(l, tst_acc)
 		plt.xlabel("Number of features (L)")
 		plt.ylabel("Testing Accuracy")
