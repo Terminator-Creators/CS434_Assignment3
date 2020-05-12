@@ -192,7 +192,9 @@ def ada_boost_testing(x_train, y_train, x_test, y_test, l=10):
 	test_accuracy = (preds_test == y_test).sum()/len(y_test)
 	print('Train {}'.format(train_accuracy))
 	print('Test {}'.format(test_accuracy))
-	return train_accuracy, test_accuracy
+	print('F1 Train {}'.format(f1(y_train, preds_train)))
+	print('F1 Test {}'.format(f1(y_test, preds_test)))
+	return train_accuracy, test_accuracy, f1(y_train, preds_train), f1(y_train, preds_train)
 	
 def create_trees_wrapper():
 	f1_accuracy = [0 for f1_accuracy in range(25)]
@@ -258,15 +260,36 @@ if __name__ == '__main__':
 	if args.ada_boost == 1:
 		x_train, y_train, x_test, y_test = adaboost_data(args.root_dir)
 		tst_acc = []
+		train_acc = []
 		l = []
+		f1_tr = []
+		f1_tst = []
 		for i in range(20):
-			trn_acc, test_acc = ada_boost_testing(x_train, y_train, x_test, y_test, i*10)
+			trn_acc, test_acc, f1_train, f1_test = ada_boost_testing(x_train, y_train, x_test, y_test, i*10)
 			l.append(i*10)
+			train_acc.append(trn_acc)
 			tst_acc.append(test_acc)
+			f1_tr.append(f1_train)
+			f1_tst.append(f1_test)
 		plt.plot(l, tst_acc)
 		plt.xlabel("Number of features (L)")
 		plt.ylabel("Testing Accuracy")
 		plt.savefig("adaboosttest.png")
 		plt.clf()
+		plt.plot(l, train_acc)
+		plt.xlabel("Number of Features (L)")
+		plt.ylabel("Training Accuracy")
+		plot.savefig("adaboosttrain.png")
+		plt.clf()
+		plotplot(l,f1_tr)
+		plt.xlabel("Number of Features (L)")
+		plt.ylabel("Training f1")
+		plot.savefig("adaboosttrainf1.png")
+		plot.clf()
+		plotplot(l,f1_tst)
+		plt.xlabel("Number of Features (L)")
+		plt.ylabel("Testing f1")
+		plot.savefig("adaboosttrainf1.png")
+		plot.clf()
 	
   print('Done')
