@@ -62,7 +62,7 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 	test_list = []
 	F1_list = []
 	
-	for i in range(10,50,10):
+	for i in range(10,210,10):
 		rclf = RandomForestClassifier(max_depth=7, max_features=11, n_trees=i)
 		rclf.fit(x_train, y_train)
 		preds_train = rclf.predict(x_train)
@@ -80,7 +80,7 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 		F1_list.append(f1(y_test, preds))
 	
 	plt.rcParams['font.family'] = ['serif']
-	x = range(10,50,10)
+	x = range(10,210,10)
 	ax = plt.subplot(111)
 	ax.plot(x, train_list, label='training') 
 	ax.plot(x, test_list, label='testing')
@@ -285,18 +285,18 @@ if __name__ == '__main__':
 		plt.plot(l, train_acc)
 		plt.xlabel("Number of Features (L)")
 		plt.ylabel("Training Accuracy")
-		plot.savefig("adaboosttrain.png")
+		plt.savefig("adaboosttrain.png")
 		plt.clf()
-		plotplot(l,f1_tr)
+		plt.plot(l,f1_tr)
 		plt.xlabel("Number of Features (L)")
 		plt.ylabel("Training f1")
-		plot.savefig("adaboosttrainf1.png")
-		plot.clf()
-		plotplot(l,f1_tst)
+		plt.savefig("adaboosttrainf1.png")
+		plt.clf()
+		plt.plot(l,f1_tst)
 		plt.xlabel("Number of Features (L)")
 		plt.ylabel("Testing f1")
-		plot.savefig("adaboosttrainf1.png")
-		plot.clf()
+		plt.savefig("adaboosttrainf1.png")
+		plt.clf()
 	
 print('Done')
 
