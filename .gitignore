@@ -2,3 +2,4 @@
 .vscode/settings.json
 src/__pycache__/tree.cpython-38.pyc
 src/__pycache__/tree.cpython-38.pyc
+*.pyc
