@@ -287,7 +287,7 @@ if __name__ == '__main__':
 		plt.ylabel("Training Accuracy")
 		plt.savefig("adaboosttrain.png")
 		plt.clf()
-		pltplot(l,f1_tr)
+		plt.plot(l,f1_tr)
 		plt.xlabel("Number of Features (L)")
 		plt.ylabel("Training f1")
 		plt.savefig("adaboosttrainf1.png")
