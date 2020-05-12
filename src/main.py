@@ -20,7 +20,7 @@ def load_args():
 	parser.add_argument('--ada_boost', default=1, type=int)
 	parser.add_argument('--root_dir', default='../data/', type=str)
 	args = parser.parse_args()
- 
+
 	return args
 
 
@@ -62,7 +62,7 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 	test_list = []
 	F1_list = []
 	
-	for i in range(10,30,10):
+	for i in range(10,50,10):
 		rclf = RandomForestClassifier(max_depth=7, max_features=11, n_trees=i)
 		rclf.fit(x_train, y_train)
 		preds_train = rclf.predict(x_train)
@@ -80,7 +80,7 @@ def random_forest_testing(x_train, y_train, x_test, y_test):
 		F1_list.append(f1(y_test, preds))
 	
 	plt.rcParams['font.family'] = ['serif']
-	x = range(10,30,10)
+	x = range(10,50,10)
 	ax = plt.subplot(111)
 	ax.plot(x, train_list, label='training') 
 	ax.plot(x, test_list, label='testing')
@@ -118,11 +118,14 @@ def ft_random_forest_testing(x_train, y_train, x_test, y_test):
 	
 	plt.rcParams['font.family'] = ['serif']
 	x = [1, 2, 5, 8, 10, 20, 25, 35, 50]
-	plt.plot(x, train_list, x, test_list, x, F1_list)
-	plt.xlabel("# of max_features")
+	ax = plt.subplot(111)
+	ax.plot(x, train_list, label='training') 
+	ax.plot(x, test_list, label='testing')
+	ax.plot(x, F1_list, label='F1')
+	plt.xlabel("max_features")
 	plt.xticks(x)
 	plt.ylabel("Accuracies")
-	plt.legend("train", "test", "F1")
+	ax.legend()
 	plt.savefig("RandomForestFeatures.png")
 	plt.clf()
 
