@@ -105,7 +105,6 @@ class DecisionTreeClassifier():
 		# If no max_features were specified when creating this tree, we don't subsample
 		else:
 			max_features = self.features_idx
-		print("max_features: {}".format(max_features))
 
 		# if we haven't hit the maximum depth, keep building
 		if depth <= self.max_depth:
