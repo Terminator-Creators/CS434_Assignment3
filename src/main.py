@@ -254,7 +254,7 @@ if __name__ == '__main__':
 		OG_random_forest_testing(x_train, y_train, x_test, y_test)
 	if args.random_forest == 2:
 		random_forest_testing(x_train, y_train, x_test, y_test)
-  if args.random_forest == 3:
+	if args.random_forest == 3:
 		ft_random_forest_testing(x_train, y_train, x_test, y_test)
 
 	if args.ada_boost == 1:
@@ -292,4 +292,4 @@ if __name__ == '__main__':
 		plot.savefig("adaboosttrainf1.png")
 		plot.clf()
 	
-  print('Done')
+print('Done')
